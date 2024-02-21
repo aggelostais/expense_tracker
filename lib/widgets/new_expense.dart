@@ -4,12 +4,12 @@ import 'package:expense_tracker/models/expense.dart';
 
 class NewExpense extends StatefulWidget {
   const NewExpense(
-      {super.key, required this.addExpenseFunc}); // const constructor, so the object is immutable, it cannot be changed after it has been created
+      {super.key, required this.onAddExpense}); // const constructor, so the object is immutable, it cannot be changed after it has been created
 
-  final void Function(Expense expense) addExpenseFunc;
+  final void Function(Expense expense) onAddExpense;
 
   @override
-  State<NewExpense> createState() {
+  State<NewExpense> createState() {   
     return _NewExpenseState();
   }
 }
@@ -52,8 +52,10 @@ class _NewExpenseState extends State<NewExpense> {
       );
       return;
     }
-    
-    widget.addExpenseFunc(Expense( //widget. is a special property to access the widget that the state object is connected to
+
+    //widget. is a special property to access the widget that the state object is connected to
+    //availble only in state classes that extend a widget class
+    widget.onAddExpense(Expense( 
       title: enteredTitle,
       amount: enteredAmount,
       date: _selectedDate!,
@@ -108,7 +110,7 @@ class _NewExpenseState extends State<NewExpense> {
   Widget build(BuildContext context) {
     return Padding(
       // padding to have some space around the modal
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
       child: Column(
         children: [
           TextField(
@@ -116,7 +118,6 @@ class _NewExpenseState extends State<NewExpense> {
                 labelText: 'Title'), // label of the text field
             maxLength: 40,
             controller: _titleController,
-            // onSubmitted: (_) => _submitData(),
           ),
           Row(
             children: [
@@ -132,7 +133,6 @@ class _NewExpenseState extends State<NewExpense> {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   controller: _amountController,
-                  // onChanged: (_) => _submitData(),
                 ),
               ),
               Expanded(
@@ -164,8 +164,7 @@ class _NewExpenseState extends State<NewExpense> {
               // we access the values property of the enum class Category
               // and map it to a list of DropdownMenuItem widgets
               DropdownButton(
-                // title field for the dropdown
-                hint: const Text('Category'),
+                hint: const Text('Category'), // title field for the dropdown
                 value:
                     _selectedCategory, // value that is stored internally in the widget
                 items: Category.values.map((Category category) {

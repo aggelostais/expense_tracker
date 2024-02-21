@@ -32,23 +32,32 @@ class _ExpensesState extends State<Expenses> {
   ];
 
   // Adds the new expense to the list of expenses
-  void addNewExpense(Expense newExpense) {
+  void _addNewExpense(Expense newExpense) {
     setState(() {
       _registeredExpenses.add(newExpense);
     });
   }
 
+  void _removeExpense(Expense expense) {
+    setState(() {
+      _registeredExpenses.remove(expense);
+    });
+  }
+
   // there is a global context variable that is available in the state object
   void _openAddExpenseOverlay() {
-    showModalBottomSheet( 
+    showModalBottomSheet(
+      isScrollControlled:
+          true, // This property is used to make the modal sheet take the full screen height
       context: context,
-      builder: (modalContext) { //builder is a function that returns a widget
-        return NewExpense(addExpenseFunc: addNewExpense); // we pass the function that will add the new expense to the list
+      builder: (modalContext) {
+        //builder is a function that returns a widget
+        return NewExpense(
+            onAddExpense:
+                _addNewExpense); // we pass the function that will add the new expense to the list
       },
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +77,10 @@ class _ExpensesState extends State<Expenses> {
           children: [
             const Text('Expenses Chart'),
             Expanded(
-              child: ExpensesList(expenses: _registeredExpenses),
+              child: ExpensesList(
+                expenses: _registeredExpenses,
+                onRemoveExpense: _removeExpense,
+              ),
             ),
           ],
         ));

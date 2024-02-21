@@ -4,8 +4,10 @@ import 'package:expense_tracker/models/expense.dart';
 
 // Just output that list of expenses
 class ExpensesList extends StatelessWidget {
-  const ExpensesList({super.key, required this.expenses});
+  const ExpensesList(
+      {super.key, required this.expenses, required this.onRemoveExpense});
   final List<Expense> expenses;
+  final void Function(Expense) onRemoveExpense;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,14 @@ class ExpensesList extends StatelessWidget {
       itemBuilder: (context, index) {
         final expense = expenses[index];
         return ListTile(
-          title: ExpenseItem(expense: expense),
+          title: Dismissible(
+            key: ValueKey(
+                expense), // Value key constructor is created with a unique value
+            onDismissed: (direction) { //diection is the direction in which the user swiped
+              onRemoveExpense(expense);
+            },
+            child: ExpenseItem(expense: expense),
+          ),
         );
       },
     );
