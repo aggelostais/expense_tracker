@@ -14,23 +14,29 @@ class ExpenseItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                expense.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+              Row(
+                children: [
+                  Icon(
+                      expense
+                          .icon, // Use the icon property of the expense object (Expense class
+                      size: 30),
+                  const SizedBox(width: 10),
+                  Text(
+                    expense.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
               Row(
                 // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(expense.icon, color: Colors.grey, size: 30), // Use the icon property of the expense object (Expense class
-                  const SizedBox(width: 5),
                   Text(
                     expense.formattedDate,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
+                    // style:
+                    //   Theme.of(context).textTheme.titleLarge,
                   ),
                   const Spacer(), // Spacer is a widget that takes up available space between widgetss
                   Text(
