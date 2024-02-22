@@ -1,7 +1,7 @@
 import 'package:expense_tracker/widgets/expenses_list/expenses_list.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/models/expense.dart';
-import 'package:expense_tracker/widgets/new_expense.dart';
+import 'package:expense_tracker/widgets/add_expense.dart';
 
 class Expenses extends StatefulWidget {
   const Expenses({super.key});
@@ -39,9 +39,24 @@ class _ExpensesState extends State<Expenses> {
   }
 
   void _removeExpense(Expense expense) {
+    final expenseIndex = _registeredExpenses.indexOf(expense);
     setState(() {
       _registeredExpenses.remove(expense);
     });
+    ScaffoldMessenger.of(context).clearSnackBars(); // clear any existing snackbar messages before showing a new one
+    ScaffoldMessenger.of(context).showSnackBar( // ScaffoldMessenger is a widget that provides access to the nearest Scaffold
+      SnackBar( // SnackBar is a widget that provides a lightweight feedback about an operation
+        content: const Text('Expense deleted'),
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(  //add undo button to the snackbar
+          label: 'Undo',
+          onPressed: () {
+            setState(() {
+              _registeredExpenses.insert(expenseIndex, expense ); //insert the expense back to the list at its original position
+            });
+          },
+      ),
+    ) );  
   }
 
   // there is a global context variable that is available in the state object
@@ -61,6 +76,16 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(BuildContext context) {
+    Widget mainContent = 
+     const Center(child: Text('No Expenses.'));
+    
+    if (_registeredExpenses.isNotEmpty) {
+      mainContent = ExpensesList(
+        expenses: _registeredExpenses,
+        onRemoveExpense: _removeExpense,
+      );
+    }
+
     return Scaffold(
         appBar: AppBar(
           title: const Text('Expense Tracker'),
@@ -77,10 +102,7 @@ class _ExpensesState extends State<Expenses> {
           children: [
             const Text('Expenses Chart'),
             Expanded(
-              child: ExpensesList(
-                expenses: _registeredExpenses,
-                onRemoveExpense: _removeExpense,
-              ),
+              child: mainContent,
             ),
           ],
         ));
