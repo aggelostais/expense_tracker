@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart'; // ios style widgets
+import 'dart:io'; // Platform class to check the platform the app is running on
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/widgets/add_expense_widgets.dart';
 
@@ -23,42 +25,67 @@ class _NewExpenseState extends State<NewExpense> {
   DateTime? _selectedDate;
   Category? _selectedCategory;
 
+  _showCupertinoDialog() {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Invalid Input'),
+          content: const Text('Please enter valid input values.'),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Okay'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _showAndroidDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Invalid Input'),
+          content: const Text('Please enter valid input values.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Okay'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   _submitData() {
     final enteredTitle = _titleController.text;
-    final enteredAmount = double.tryParse(_amountController
-        .text); //parse the string to a double, if not parsable null
+    final enteredAmount = double.tryParse(_amountController.text);
     final amountValid = enteredAmount != null && enteredAmount > 0;
 
-    //Error message if the input is invalid
     if (enteredTitle.trim().isEmpty ||
         !amountValid ||
         _selectedDate == null ||
         _selectedCategory == null) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Invalid Input'),
-            content: const Text('Please enter valid input values.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Okay'),
-              ),
-            ],
-          );
-        },
-      );
-      return;
+      if (Platform.isIOS) {
+        _showCupertinoDialog();
+      } else {
+        _showAndroidDialog();
+      }
     }
 
     //widget. is a special property to access the widget that the state object is connected to
     //availble only in state classes that extend a widget class
     widget.onAddExpense(Expense(
       title: enteredTitle,
-      amount: enteredAmount,
+      amount: enteredAmount!,
       date: _selectedDate!,
       category: _selectedCategory!,
     ));
