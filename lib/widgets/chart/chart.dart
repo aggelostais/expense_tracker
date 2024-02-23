@@ -8,7 +8,8 @@ class Chart extends StatelessWidget {
 
   final List<Expense> expenses;
 
-  List<ExpenseBucket> get buckets { //getter to return a list of ExpenseBucket objects 
+  List<ExpenseBucket> get buckets {
+    //getter to return a list of ExpenseBucket objects
     return [
       ExpenseBucket.forCategory(expenses, Category.food),
       ExpenseBucket.forCategory(expenses, Category.leisure),
@@ -33,6 +34,9 @@ class Chart extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode =
         MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final calculatedBuckets = buckets; // buckets is called only once
+    final calculatedMaxTotalExpense = maxTotalExpense; // maxTotalExpense is called only once
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(
@@ -46,7 +50,7 @@ class Chart extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).colorScheme.primary.withOpacity(0.3),
-            Theme.of(context).colorScheme.primary.withOpacity(0.0)
+            Theme.of(context).colorScheme.primary.withOpacity(0.0),
           ],
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
@@ -59,19 +63,20 @@ class Chart extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 // for a list of widgets, we don't need {}
-                for (final bucket in buckets) // alternative to map()
+                for (final bucket in calculatedBuckets) // alternative to map()
                   ChartBar( //fill property to determine the height of the bar
+                    
                     fill: bucket.totalExpenses == 0
                         ? 0
                         // the maxTotalExpense is the maximum value of the chart, having the maximum height
-                        : bucket.totalExpenses / maxTotalExpense, 
-                  )
+                        : bucket.totalExpenses / calculatedMaxTotalExpense,
+                  ),
               ],
             ),
           ),
           const SizedBox(height: 12),
           Row(
-            children: buckets
+            children: calculatedBuckets
                 .map(
                   (bucket) => Expanded(
                     child: Padding(
@@ -89,7 +94,7 @@ class Chart extends StatelessWidget {
                   ),
                 )
                 .toList(),
-          )
+          ),
         ],
       ),
     );

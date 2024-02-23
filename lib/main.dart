@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:expense_tracker/widgets/home.dart';
 
 // fromSeed method creates a new ColorScheme object with the specified seed color
