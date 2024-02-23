@@ -45,20 +45,25 @@ class _ExpensesState extends State<Expenses> {
     setState(() {
       _registeredExpenses.remove(expense);
     });
-    ScaffoldMessenger.of(context).clearSnackBars(); // clear any existing snackbar messages before showing a new one
-    ScaffoldMessenger.of(context).showSnackBar( // ScaffoldMessenger is a widget that provides access to the nearest Scaffold
-      SnackBar( // SnackBar is a widget that provides a lightweight feedback about an operation
-        content: const Text('Expense deleted'),
-        duration: const Duration(seconds: 5),
-        action: SnackBarAction(  //add undo button to the snackbar
-          label: 'Undo',
-          onPressed: () {
-            setState(() {
-              _registeredExpenses.insert(expenseIndex, expense ); //insert the expense back to the list at its original position
-            });
-          },
+    ScaffoldMessenger.of(context)
+        .clearSnackBars(); // clear any existing snackbar messages before showing a new one
+    ScaffoldMessenger.of(context).showSnackBar(
+        // ScaffoldMessenger is a widget that provides access to the nearest Scaffold
+        SnackBar(
+      // SnackBar is a widget that provides a lightweight feedback about an operation
+      content: const Text('Expense deleted'),
+      duration: const Duration(seconds: 5),
+      action: SnackBarAction(
+        //add undo button to the snackbar
+        label: 'Undo',
+        onPressed: () {
+          setState(() {
+            _registeredExpenses.insert(expenseIndex,
+                expense); //insert the expense back to the list at its original position
+          });
+        },
       ),
-    ) );  
+    ));
   }
 
   // there is a global context variable that is available in the state object
@@ -78,9 +83,12 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(BuildContext context) {
-    Widget mainContent = 
-     const Center(child: Text('No Expenses.'));
-    
+    // build method is executed again when screen orientation changes
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+
+    Widget mainContent = const Center(child: Text('No Expenses.'));
+
     if (_registeredExpenses.isNotEmpty) {
       mainContent = ExpensesList(
         expenses: _registeredExpenses,
@@ -89,24 +97,39 @@ class _ExpensesState extends State<Expenses> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Expense Tracker'),
-          actions: [
-            // Typically used to display buttons at the app bar
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed:
-                  _openAddExpenseOverlay, // We pass a pointer to that method, so without ()
+      appBar: AppBar(
+        title: const Text('Expense Tracker'),
+        actions: [
+          // Typically used to display buttons at the app bar
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed:
+                _openAddExpenseOverlay, // We pass a pointer to that method, so without ()
+          ),
+        ],
+      ),
+      body: width < 600 // if the width is less than 600, we display the chart below the list
+          ? Column(
+              children: [
+                Chart(expenses: _registeredExpenses),
+                Expanded(
+                  child: mainContent,
+                ),
+              ],
+            )
+          : Row( // if the width is greater than 600, we display the chart next to the list
+              children: [
+                 Container(
+                  width: width / 3,
+                  height: height,
+                  child: Chart(expenses: _registeredExpenses),
+                ),
+                Expanded( // Always the solution when wrapped widgets don't work as expected
+                  child: mainContent,
+                ),
+               
+              ],
             ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Chart(expenses: _registeredExpenses),
-            Expanded(
-              child: mainContent,
-            ),
-          ],
-        ));
+    );
   }
 }

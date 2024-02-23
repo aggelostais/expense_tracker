@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:expense_tracker/widgets/home.dart';
 
 // fromSeed method creates a new ColorScheme object with the specified seed color
@@ -40,5 +41,13 @@ class MyApp extends StatelessWidget {
 }
 
 void main() {
-  runApp(const MyApp());
+  // Force the app to be in portrait mode
+  // WidgetsFlutterBinding
+  //     .ensureInitialized(); // ensures that locking the orientation is done before the app starts
+  // SystemChrome.setPreferredOrientations(
+  //     // sets the preferred orientations we allow
+  //     [DeviceOrientation.portraitUp]).then((function) {
+  //   runApp(const MyApp());
+  // });
+      runApp(const MyApp());
 }
