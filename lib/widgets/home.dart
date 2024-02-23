@@ -69,6 +69,8 @@ class _ExpensesState extends State<Expenses> {
   // there is a global context variable that is available in the state object
   void _openAddExpenseOverlay() {
     showModalBottomSheet(
+      useSafeArea:
+          true, // stay away from device's unsafe area (notch, home indicator, etc.)
       isScrollControlled:
           true, // This property is used to make the modal sheet take the full screen height
       context: context,
@@ -108,7 +110,8 @@ class _ExpensesState extends State<Expenses> {
           ),
         ],
       ),
-      body: width < 600 // if the width is less than 600, we display the chart below the list
+      body: width <
+              600 // if the width is less than 600, we display the chart below the list
           ? Column(
               children: [
                 Chart(expenses: _registeredExpenses),
@@ -117,17 +120,18 @@ class _ExpensesState extends State<Expenses> {
                 ),
               ],
             )
-          : Row( // if the width is greater than 600, we display the chart next to the list
+          : Row(
+              // if the width is greater than 600, we display the chart next to the list
               children: [
-                 Container(
+                SizedBox(
                   width: width / 3,
                   height: height,
                   child: Chart(expenses: _registeredExpenses),
                 ),
-                Expanded( // Always the solution when wrapped widgets don't work as expected
+                Expanded(
+                  // Always the solution when wrapped widgets don't work as expected
                   child: mainContent,
                 ),
-               
               ],
             ),
     );

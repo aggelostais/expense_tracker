@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/widgets/add_expense_widgets.dart';
 
 class NewExpense extends StatefulWidget {
   const NewExpense(
-      {super.key, required this.onAddExpense}); // const constructor, so the object is immutable, it cannot be changed after it has been created
+      {super.key,
+      required this.onAddExpense}); // const constructor, so the object is immutable, it cannot be changed after it has been created
 
   final void Function(Expense expense) onAddExpense;
 
   @override
-  State<NewExpense> createState() {   
+  State<NewExpense> createState() {
     return _NewExpenseState();
   }
 }
@@ -55,7 +56,7 @@ class _NewExpenseState extends State<NewExpense> {
 
     //widget. is a special property to access the widget that the state object is connected to
     //availble only in state classes that extend a widget class
-    widget.onAddExpense(Expense( 
+    widget.onAddExpense(Expense(
       title: enteredTitle,
       amount: enteredAmount,
       date: _selectedDate!,
@@ -108,211 +109,105 @@ class _NewExpenseState extends State<NewExpense> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      // padding to have some space around the modal
-      padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
-      child: Column(
-        children: [
-          TextField(
-            decoration: const InputDecoration(
-                labelText: 'Title'), // label of the text field
-            maxLength: 40,
-            controller: _titleController,
-          ),
-          Row(
-            children: [
-              // TextField in a Row should be wrapped in an Expanded widget to avoid overflow problems
-              // Textfield wants to take as much space as possible with the row not restricting the space taken
-              // so it causes an overflow
-              Expanded(
-                child: TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Amount',
-                    suffixText: ' €',
-                  ),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  controller: _amountController,
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      _selectedDate == null
-                          ? 'No Date Selected'
-                          : DateFormat('dd/MM/yyyy').format(
-                              _selectedDate!), //! after a variable means that it is never null, as we checked it befores
-                    ),
-                    IconButton(
-                      onPressed: _presentDatePicker,
-                      icon: const Icon(Icons.calendar_today),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(
-              height:
-                  40), // add some space between the two rows (textfields and buttons
-          Row(
-            children: [
-              // we access the values property of the enum class Category
-              // and map it to a list of DropdownMenuItem widgets
-              DropdownButton(
-                hint: const Text('Category'), // title field for the dropdown
-                value:
-                    _selectedCategory, // value that is stored internally in the widget
-                items: Category.values.map((Category category) {
-                  return DropdownMenuItem(
-                    value:
-                        category, // value that is stored internally in the widget
-                    child: Row(
+    final keyboardSpace = MediaQuery.of(context)
+        .viewInsets
+        .bottom; // Extra information about UI elements that overlap parts of the UI
+    return LayoutBuilder(
+      // LayoutBuilder is a widget that provides the constraints of the parent widget to its builder function
+      builder: (context, constrains) {
+        final width = constrains.maxWidth;
+        return SizedBox(
+          // With sized box it takes the whole screen height
+          height: double.infinity,
+          child: SingleChildScrollView(
+            child: Padding(
+              // padding to have some space around the modal
+              padding: EdgeInsets.fromLTRB(16, 16, 16, keyboardSpace + 16),
+              child: width < 600
+                  ? Column(
                       children: [
-                        Icon(categoryIcons[category]),
-                        const SizedBox(width: 15),
-                        Text(category.name[0].toUpperCase() +
-                            category.name.substring(1)),
+                        Row(
+                          children: [
+                            TitleInput(titleController: _titleController),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            AmountInput(amountController: _amountController),
+                            DateInput(
+                                selectedDate: _selectedDate,
+                                presentDatePicker: _presentDatePicker)
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        Row(
+                          children: [
+                            CategoryInput(
+                              selectedCategory: _selectedCategory,
+                              selectCategory: _selectCategory,
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.cancel),
+                              onPressed: () {
+                                Navigator.pop(context); //close the modal
+                              },
+                            ),
+                            const SizedBox(width: 5),
+                            ElevatedButton(
+                              onPressed: _submitData,
+                              child: const Text('Add Expense'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TitleInput(titleController: _titleController),
+                            const SizedBox(width: 20),
+                            AmountInput(amountController: _amountController)
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            CategoryInput(
+                              selectedCategory: _selectedCategory,
+                              selectCategory: _selectCategory,
+                            ),
+                            DateInput(
+                                selectedDate: _selectedDate,
+                                presentDatePicker: _presentDatePicker)
+                          ],
+                        ),
+                        const SizedBox(
+                            height:
+                                30), // add some space between the two rows (textfields and buttons)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.cancel),
+                              onPressed: () {
+                                Navigator.pop(context); //close the modal
+                              },
+                            ),
+                            const SizedBox(width: 5),
+                            ElevatedButton(
+                              onPressed: _submitData,
+                              child: const Text('Add Expense'),
+                            ),
+                          ],
+                        )
                       ],
                     ),
-                  );
-                }).toList(),
-                onChanged: (value) => _selectCategory(value),
-              ),
-              const Spacer(),
-              IconButton(
-                //Cancel button
-                icon: const Icon(Icons.cancel),
-                onPressed: () {
-                  Navigator.pop(context); //close the modal
-                },
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: _submitData,
-                child: const Text('Add Expense'),
-              ),
-            ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// class _NewExpenseState extends State<NewExpense>{
-//   final _titleController = TextEditingController();
-//   final _amountController = TextEditingController();
-//   DateTime? _selectedDate;
-
-//   void _submitData() {
-//     final enteredTitle = _titleController.text;
-//     final enteredAmount = double.parse(_amountController.text);
-
-//     if (enteredTitle.isEmpty || enteredAmount <= 0 || _selectedDate == null) {
-//       return;
-//     }
-
-//     // widget is a special property that is available in the state object
-//     // it is a pointer to the widget that the state object is connected to
-//     // in this case, it is a pointer to the NewExpense widget
-//     widget.addExpense(
-//       enteredTitle,
-//       enteredAmount,
-//       _selectedDate,
-//     );
-
-//     // close the modal bottom sheet
-//     Navigator.of(context).pop();
-//   }
-
-//   void _presentDatePicker() {
-//     showDatePicker(
-//       context: context,
-//       initialDate: DateTime.now(),
-//       firstDate: DateTime(2021),
-//       lastDate: DateTime.now(),
-//     ).then((pickedDate) {
-//       if (pickedDate == null) {
-//         return;
-//       }
-//       setState(() {
-//         _selectedDate = pickedDate;
-//       });
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return SingleChildScrollView(
-//       child: Card(
-//         elevation: 5,
-//         child: Container(
-//           padding: EdgeInsets.only(
-//             top: 10,
-//             left: 10,
-//             right: 10,
-//             bottom: MediaQuery.of(context).viewInsets.bottom + 10,
-//           ),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.end,
-//             children: [
-//               TextField(
-//                 decoration: const InputDecoration(labelText: 'Title'),
-//                 controller: _titleController,
-//                 onSubmitted: (_) => _submitData(),
-//               ),
-//               TextField(
-//                 decoration: const InputDecoration(labelText: 'Amount'),
-//                 controller: _amountController,
-//                 keyboardType: TextInputType.number,
-//                 onSubmitted: (_) => _submitData(),
-//               ),
-//               Row(
-//                 children: [
-//                   Expanded(
-//                     child: Text(
-//                       _selectedDate == null
-//                           ? 'No Date Chosen!'
-//                           : 'Picked Date: ${DateFormat.yMd().format(_selectedDate!)}',
-//                     ),
-//                   ),
-//                   TextButton(
-//                     onPressed: _presentDatePicker,
-//                     child: const Text(
-//                       'Choose Date',
-//                       style: TextStyle(
-//                         fontWeight: FontWeight.bold,
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               ElevatedButton(
-//                 onPressed: _submitData,
-//                 child: const Text('Add Expense'),
-//               ),
-//            ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
